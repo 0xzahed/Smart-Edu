@@ -173,12 +173,12 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-white mb-2">First Name</label>
-                        <input type="text" id="firstName" name="first_name" required class="input-focus w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300" placeholder="Abu" value="{{ old('first_name') }}">
+                        <input type="text" id="firstName" name="first_name" required class="input-focus w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300" placeholder="Arnub" value="{{ old('first_name') }}">
                         @error('first_name')<div class="text-red-300 text-sm mt-1">{{ $message }}</div>@enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-white mb-2">Last Name</label>
-                        <input type="text" id="lastName" name="last_name" required class="input-focus w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300" placeholder="Zahed" value="{{ old('last_name') }}">
+                        <input type="text" id="lastName" name="last_name" required class="input-focus w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300" placeholder="Datta" value="{{ old('last_name') }}">
                         @error('last_name')<div class="text-red-300 text-sm mt-1">{{ $message }}</div>@enderror
                     </div>
                 </div>
