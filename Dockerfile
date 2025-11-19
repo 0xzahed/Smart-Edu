@@ -61,6 +61,10 @@ COPY docker/nginx/fly.conf /etc/nginx/sites-available/default
 # Copy supervisor configuration for Fly.io
 COPY docker/supervisor/fly-supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Copy startup script
+COPY start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
 # Expose port (Fly.io uses 8080)
 EXPOSE 8080
 
@@ -68,5 +72,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
   CMD curl -f http://localhost:8080/ || exit 1
 
-# Start supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Use startup script
+CMD ["/usr/local/bin/start.sh"]
