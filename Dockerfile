@@ -24,11 +24,17 @@ RUN docker-php-ext-install pdo_sqlite pdo_mysql mbstring exif pcntl bcmath gd
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Install Node.js and npm
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get install -y nodejs
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs
 
 # Set working directory
 WORKDIR /var/www/html
+
+# Copy package files first
+COPY package*.json ./
+
+# Install Node dependencies
+RUN npm install
 
 # Copy application files
 COPY . .
@@ -36,8 +42,7 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev --no-interaction
 
-# Install Node dependencies and build assets
-RUN npm ci --only=production
+# Build assets
 RUN npm run build
 
 # Create SQLite database directory (will be mounted from Fly volume)
