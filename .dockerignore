@@ -1,5 +1,4 @@
 node_modules
-vendor
 .git
 .env
 .env.backup
@@ -16,3 +15,8 @@ yarn-error.log
 /public/storage
 /storage/logs/*
 !/storage/logs/.gitignore
+tests
+phpunit.xml
+README.md
+fly.toml
+.dockerignore

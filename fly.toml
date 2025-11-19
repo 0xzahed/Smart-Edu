@@ -1,0 +1,40 @@
+app = "insight-edu"
+primary_region = "sin" # Singapore - change to your nearest region (use 'fly platform regions' to see options)
+
+[build]
+
+[deploy]
+  release_command = "php artisan migrate --force && php artisan storage:link"
+
+[env]
+  APP_ENV = "production"
+  APP_DEBUG = "false"
+  LOG_CHANNEL = "stderr"
+  LOG_LEVEL = "info"
+  DB_CONNECTION = "sqlite"
+  SESSION_DRIVER = "database"
+  CACHE_STORE = "database"
+  QUEUE_CONNECTION = "database"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[[mounts]]
+  source = "insight_edu_data"
+  destination = "/var/www/html/storage/database"
+  initial_size = "3gb"

@@ -10,13 +10,15 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     nginx \
-    supervisor
+    supervisor \
+    sqlite3 \
+    libsqlite3-dev
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_sqlite pdo_mysql mbstring exif pcntl bcmath gd
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -26,37 +28,40 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt-get install -y nodejs
 
 # Set working directory
-WORKDIR /var/www
+WORKDIR /var/www/html
 
 # Copy application files
 COPY . .
 
 # Install PHP dependencies
-RUN composer install --optimize-autoloader --no-dev
+RUN composer install --optimize-autoloader --no-dev --no-interaction
 
 # Install Node dependencies and build assets
-RUN npm install
+RUN npm ci --only=production
 RUN npm run build
 
+# Create SQLite database directory (will be mounted from Fly volume)
+RUN mkdir -p /var/www/html/storage/database
+RUN touch /var/www/html/storage/database/database.sqlite
+
 # Set permissions
-RUN chown -R www-data:www-data /var/www
-RUN chmod -R 755 /var/www/storage
-RUN chmod -R 755 /var/www/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html
+RUN chmod -R 775 /var/www/html/storage
+RUN chmod -R 775 /var/www/html/bootstrap/cache
+RUN chmod -R 775 /var/www/html/storage/database
 
-# Create database directory for SQLite
-RUN mkdir -p /var/www/database
-RUN touch /var/www/database/database.sqlite
-RUN chown -R www-data:www-data /var/www/database
-RUN chmod -R 775 /var/www/database
+# Copy nginx configuration for Fly.io
+COPY docker/nginx/fly.conf /etc/nginx/sites-available/default
 
-# Copy nginx configuration
-COPY docker/nginx/default.conf /etc/nginx/sites-available/default
+# Copy supervisor configuration for Fly.io
+COPY docker/supervisor/fly-supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Copy supervisor configuration
-COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Expose port
+# Expose port (Fly.io uses 8080)
 EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
+  CMD curl -f http://localhost:8080/ || exit 1
 
 # Start supervisor
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
