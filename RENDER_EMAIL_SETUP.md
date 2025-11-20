@@ -18,10 +18,10 @@ Click "Add Environment Variable" for each:
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=zahed01x@gmail.com
-MAIL_PASSWORD=jlsg idzx onxb jamw
+MAIL_USERNAME=arnubdatta17@gmail.com
+MAIL_PASSWORD=your_app_password_here
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=zahed01x@gmail.com
+MAIL_FROM_ADDRESS=arnubdatta17@gmail.com
 MAIL_FROM_NAME=InsightEdu
 ```
 
