@@ -52,11 +52,7 @@ class AuthController extends Controller
                 return back()->withErrors(['status' => 'Your account is not active. Please contact administrator.'])->withInput();
             }
             
-            // Check if user is verified
-            if (!$user->is_verified) {
-                Auth::logout();
-                return back()->withErrors(['email' => 'Your account is not verified. Please check your email for verification code.'])->withInput();
-            }
+            // Removed email verification check - users can login immediately after registration
             
             // Check if user role matches selected role
             if ($user->role !== $role) {
@@ -107,7 +103,7 @@ class AuthController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        // Create user
+        // Create user with verified status (no email verification needed)
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -118,21 +114,12 @@ class AuthController extends Controller
             'employee_student_id' => $request->user_id,
             'student_id' => $request->role === 'student' ? $request->user_id : null,
             'employee_id' => $request->role === 'instructor' ? $request->user_id : null,
-            'is_verified' => false,
+            'is_verified' => true,  // Auto-verify users
+            'email_verified_at' => now(),  // Mark as verified immediately
         ]);
 
-        // Send verification code
-        $emailController = new \App\Http\Controllers\EmailController();
-        $codeSent = $emailController->sendVerificationCode($user);
-
-        if ($codeSent) {
-            return redirect()->route('verify.code.form')->with([
-                'success' => 'Registration successful! A 6-digit verification code has been sent to your email.',
-                'email' => $user->email
-            ]);
-        } else {
-            return back()->withErrors(['email' => 'Registration successful but failed to send verification code. Please contact support.']);
-        }
+        // Redirect directly to login page
+        return redirect()->route('login')->with('success', 'Registration successful! You can now login with your credentials.');
     }
 
     // Handle logout

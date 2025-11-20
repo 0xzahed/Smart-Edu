@@ -87,23 +87,12 @@ class GoogleAuthController extends Controller
             $user = User::where('email', $googleUser->getEmail())->first();
 
             if ($user) {
-                // Enforce verification (both flags to be safe with the rest of the app)
-                if (!$user->is_verified || !$user->email_verified_at) {
-                    // Re-send verification link for convenience
-                    try {
-                        $this->sendVerificationEmail($user);
-                    } catch (\Exception $e) {
-                        Log::warning('Resend verification email failed: ' . $e->getMessage());
-                    }
-                    return redirect()->route('login')->with('error', 'Your account is not verified. A new verification link has been sent to your email.');
-                }
-
                 // Check if role matches
                 if ($user->role !== $role) {
                     return redirect()->route('login')->with('error', 'Selected role does not match your account role.');
                 }
 
-                // Login existing user
+                // Login existing user (no verification check needed)
                 Auth::login($user, true);
                 return RoleRedirectHelper::redirectToRoleDashboard($user->role);
             } else {
@@ -158,7 +147,7 @@ class GoogleAuthController extends Controller
                 return redirect()->route('login')->with('error', 'User already exists. Please login instead.');
             }
 
-            // Create new user (without verification for now)
+            // Create new user with auto-verification
             $user = User::create([
                 'name' => $googleUserData['name'],
                 'first_name' => $googleUserData['first_name'],
@@ -168,19 +157,17 @@ class GoogleAuthController extends Controller
                 'role' => $googleUserData['role'],
                 'google_id' => $googleUserData['google_id'],
                 'avatar' => $googleUserData['avatar'],
-                'email_verified_at' => null, // Will be set after email verification
+                'is_verified' => true, // Auto-verify Google users
+                'email_verified_at' => now(), // Mark as verified immediately
             ]);
-
-            // Send verification email
-            $this->sendVerificationEmail($user);
 
             // Clear session data
             session()->forget('google_user_data');
 
-            return redirect()->route('login')->with([
-                'success' => 'Registration successful! Please check your email for verification link. The link will expire in 10 minutes.',
-                'email_sent' => $user->email
-            ]);
+            // Login user immediately
+            Auth::login($user, true);
+
+            return RoleRedirectHelper::redirectToRoleDashboard($user->role);
 
         } catch (\Exception $e) {
             return redirect()->route('login')->with('error', 'Registration failed: ' . $e->getMessage());
