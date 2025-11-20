@@ -1,12 +1,10 @@
 import './bootstrap';
-import './pages/auth';
 
 // Import page-specific JavaScript files
 import './pages/welcome.js';
 import './pages/auth.js';
 
 // Global notification utility
-import './bootstrap';
 import './utils/NotificationManager';
 
 // Legacy notification function for backwards compatibility
