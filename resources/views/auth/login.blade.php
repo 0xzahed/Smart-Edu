@@ -31,12 +31,17 @@
         }
 
         .role-tab {
-            transition: all 0.2s ease;
+            transition: all 0.2s ease !important;
+            cursor: pointer !important;
+        }
+
+        .role-tab:hover {
+            background: rgba(255, 255, 255, 0.15) !important;
         }
 
         .role-tab.active {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            color: white;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+            color: white !important;
         }
 
         .floating-shapes {
@@ -77,6 +82,86 @@
             50% { transform: translateY(-4px) rotate(20deg); }
         }
     </style>
+    
+    <!-- Inline JavaScript for login role selection -->
+    <script>
+        console.log('[LOGIN] Script loaded - readyState:', document.readyState);
+        
+        let loginInitialized = false;
+        
+        function initLoginRoles() {
+            if (loginInitialized) {
+                console.log('[LOGIN] Already initialized');
+                return;
+            }
+            
+            console.log('[LOGIN] Initializing...');
+            
+            const roleTabs = document.querySelectorAll('.role-tab');
+            const roleInput = document.getElementById('roleInput');
+            
+            if (roleTabs.length === 0) {
+                console.log('[LOGIN] Role tabs not found yet');
+                return false;
+            }
+            
+            console.log('[LOGIN] Found', roleTabs.length, 'role tabs');
+            
+            roleTabs.forEach((tab, index) => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const role = this.getAttribute('data-role');
+                    console.log('[LOGIN] Role tab clicked:', role);
+                    
+                    // Force remove active from all
+                    roleTabs.forEach(t => {
+                        t.classList.remove('active');
+                        t.style.background = '';
+                        t.style.color = '';
+                    });
+                    
+                    // Force add active to clicked
+                    this.classList.add('active');
+                    this.style.background = 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)';
+                    this.style.color = 'white';
+                    
+                    // Update hidden input
+                    if (roleInput) {
+                        roleInput.value = role;
+                        console.log('[LOGIN] Hidden input updated:', role);
+                    }
+                });
+            });
+            
+            // Password toggle
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('passwordInput');
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordInput.type === 'password' ? 'text' : 'password';
+                    passwordInput.type = type;
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+                    }
+                });
+            }
+            
+            loginInitialized = true;
+            console.log('[LOGIN] ✓ Initialization complete');
+            return true;
+        }
+        
+        // Multiple initialization strategies
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            initLoginRoles();
+        }
+        
+        document.addEventListener('DOMContentLoaded', initLoginRoles);
+        window.addEventListener('load', initLoginRoles);
+        setTimeout(initLoginRoles, 100);
+        setTimeout(initLoginRoles, 500);
+    </script>
 </head>
 
 <body class="gradient-bg min-h-screen flex items-center justify-center p-4 relative" @if(session('error')) data-session-error="{{ e(session('error')) }}" @endif @if(session('success')) data-session-success="{{ e(session('success')) }}" @endif>
