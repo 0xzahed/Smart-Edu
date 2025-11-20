@@ -42,22 +42,23 @@
         }
 
         .role-card {
-            transition: all 0.3s ease;
-            position: relative;
-            cursor: pointer;
+            transition: all 0.3s ease !important;
+            position: relative !important;
+            cursor: pointer !important;
         }
 
         .role-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12) !important;
+            background: rgba(255, 255, 255, 0.2) !important;
         }
 
         .role-card.selected {
             background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-            color: white;
+            color: white !important;
             border-color: #4f46e5 !important;
-            transform: translateY(-3px);
-            box-shadow: 0 12px 28px rgba(79, 70, 229, 0.32);
+            transform: translateY(-3px) !important;
+            box-shadow: 0 12px 28px rgba(79, 70, 229, 0.32) !important;
         }
 
         .role-card.selected::before {
@@ -88,16 +89,21 @@
         }
     </style>
     
-    <!-- Inline JavaScript for role selection - guaranteed to work -->
+    <!-- Inline JavaScript for role selection - AGGRESSIVE LOADING -->
     <script>
-        // Execute immediately when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initRoleSelection);
-        } else {
-            initRoleSelection();
-        }
+        console.log('[INLINE] Script loaded - readyState:', document.readyState);
+        
+        // Try to initialize immediately
+        let initialized = false;
         
         function initRoleSelection() {
+            if (initialized) {
+                console.log('[INLINE] Already initialized, skipping');
+                return;
+            }
+            
+            console.log('[INLINE] Attempting initialization...');
+            
             const roleCards = document.querySelectorAll('.role-card');
             const selectedRoleInput = document.getElementById('selectedRole');
             const idField = document.getElementById('idField');
@@ -108,30 +114,64 @@
             const roleError = document.getElementById('roleError');
             const registrationForm = document.getElementById('registrationForm');
             
+            if (roleCards.length === 0) {
+                console.log('[INLINE] Role cards not found yet, retrying...');
+                return false;
+            }
+            
+            console.log('[INLINE] Found', roleCards.length, 'role cards - attaching listeners');
+            
             // Role card click handler
-            roleCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    console.log('Role card clicked:', this.getAttribute('data-role'));
+            roleCards.forEach((card, index) => {
+                // Add visual test on hover
+                card.addEventListener('mouseenter', function() {
+                    console.log('[INLINE] Mouse entered card', index);
+                });
+                
+                card.addEventListener('click', function(e) {
+                    console.log('[INLINE] ✓ CLICK DETECTED on card', index);
+                    console.log('[INLINE] Role:', this.getAttribute('data-role'));
+                    
+                    // Force visual feedback
+                    this.style.background = 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)';
+                    this.style.color = 'white';
+                    this.style.transform = 'translateY(-3px)';
+                    this.style.borderColor = '#4f46e5';
                     
                     // Remove selected class from all cards
-                    roleCards.forEach(c => c.classList.remove('selected'));
+                    roleCards.forEach(c => {
+                        c.classList.remove('selected');
+                        c.style.background = '';
+                        c.style.color = '';
+                        c.style.transform = '';
+                        c.style.borderColor = '';
+                    });
                     
                     // Add selected class to clicked card
                     this.classList.add('selected');
+                    this.style.background = 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)';
+                    this.style.color = 'white';
+                    this.style.transform = 'translateY(-3px)';
+                    this.style.borderColor = '#4f46e5';
                     
                     const role = this.getAttribute('data-role');
                     selectedRoleInput.value = role;
                     
+                    console.log('[INLINE] Hidden input updated:', role);
+                    
                     // Show ID field
-                    idField.classList.remove('hidden');
+                    if (idField) {
+                        idField.classList.remove('hidden');
+                        console.log('[INLINE] ID field shown');
+                    }
                     
                     // Update label and placeholder based on role
                     if (role === 'student') {
-                        idLabel.textContent = 'Student ID';
-                        userIdInput.placeholder = '221-15-4716';
+                        if (idLabel) idLabel.textContent = 'Student ID';
+                        if (userIdInput) userIdInput.placeholder = '221-15-4716';
                     } else if (role === 'instructor') {
-                        idLabel.textContent = 'Employee ID';
-                        userIdInput.placeholder = 'EMP001';
+                        if (idLabel) idLabel.textContent = 'Employee ID';
+                        if (userIdInput) userIdInput.placeholder = 'EMP001';
                     }
                     
                     // Hide error
@@ -164,8 +204,11 @@
                             roleError.classList.remove('hidden');
                             roleError.scrollIntoView({ behavior: 'smooth' });
                         }
+                        console.log('[INLINE] Form blocked - no role selected');
                         return false;
                     }
+                    
+                    console.log('[INLINE] Form submitting with role:', selectedRoleInput.value);
                     
                     // Update hidden fields before submit
                     const role = selectedRoleInput.value;
@@ -209,14 +252,48 @@
             }
             
             // Restore old role if validation failed
-            const oldRole = selectedRoleInput.value;
+            const oldRole = selectedRoleInput ? selectedRoleInput.value : '';
             if (oldRole) {
                 const roleCard = document.querySelector(`[data-role="${oldRole}"]`);
                 if (roleCard) {
                     roleCard.click();
                 }
             }
+            
+            initialized = true;
+            console.log('[INLINE] ✓ Initialization complete!');
+            return true;
         }
+        
+        // Try multiple initialization strategies
+        // Strategy 1: Immediate
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            console.log('[INLINE] DOM already ready, initializing now');
+            initRoleSelection();
+        }
+        
+        // Strategy 2: DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[INLINE] DOMContentLoaded fired');
+            initRoleSelection();
+        });
+        
+        // Strategy 3: Load event (backup)
+        window.addEventListener('load', function() {
+            console.log('[INLINE] Window load event fired');
+            initRoleSelection();
+        });
+        
+        // Strategy 4: Retry with timeout (ultra-backup)
+        setTimeout(function() {
+            console.log('[INLINE] Timeout retry');
+            initRoleSelection();
+        }, 100);
+        
+        setTimeout(function() {
+            console.log('[INLINE] Second timeout retry');
+            initRoleSelection();
+        }, 500);
     </script>
 </head>
 
