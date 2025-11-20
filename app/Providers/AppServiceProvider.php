@@ -12,8 +12,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Register GoogleDriveService as a singleton but don't instantiate it unless needed
         $this->app->singleton(\App\Services\GoogleDriveService::class, function ($app) {
-            return new \App\Services\GoogleDriveService();
+            // Only create if Google Drive credentials are configured
+            if (env('GOOGLE_REFRESH_TOKEN')) {
+                return new \App\Services\GoogleDriveService();
+            }
+            return null;
         });
     }
 
