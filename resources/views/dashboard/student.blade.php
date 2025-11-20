@@ -6,7 +6,7 @@
 <div class="px-0 pt-2 md:pt-0">
     <div class="py-2 md:py-4">
                 <!-- Welcome Section -->
-                <div class="student-header bg-gradient-to-r from-indigo-600 bg-purple-600 to-pink-600 rounded-2xl px-8 py-6 mb-6 text-white shadow">
+                <div class="student-header bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl px-8 py-6 mb-6 text-white shadow">
                     <div class="flex items-center justify-between">
                         <div>
                             <h2 class="text-3xl font-bold mb-2 text-white">Welcome back, {{ $user->first_name }}! 👋</h2>
