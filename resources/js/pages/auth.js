@@ -41,12 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Registration form validation
-  const regForm = document.getElementById('registrationForm');
-  if (regForm) {
-    // This is handled by the detailed registration functionality below
-    // Keeping this minimal to avoid conflicts
-  }
+  // Registration form validation - handled in the detailed section below
+  // Removed to avoid conflicts with the DOMContentLoaded handler
 });
 
 // Authentication page functionality - Login & Registration
@@ -201,8 +197,154 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===========================================
     // REGISTRATION PAGE FUNCTIONALITY
     // ===========================================
-    // Registration functionality is handled by registration.js
-    // This section is intentionally left minimal to avoid conflicts
+    if (isRegistrationPage) {
+        // Form elements
+        const registrationForm = document.getElementById('registrationForm');
+        const roleCards = document.querySelectorAll('.role-card');
+        const selectedRoleInput = document.getElementById('selectedRole');
+        const idField = document.getElementById('idField');
+        const idLabel = document.getElementById('idLabel');
+        const userIdInput = document.getElementById('userId');
+        const studentIdInput = document.getElementById('student_id');
+        const employeeIdInput = document.getElementById('employee_id');
+        const passwordInput = document.getElementById('password');
+        const passwordConfirmInput = document.getElementById('password_confirmation');
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        const togglePasswordConfirmBtn = document.getElementById('togglePasswordConfirmation');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const submitLoader = document.getElementById('submitLoader');
+        const roleError = document.getElementById('roleError');
+        
+        // Role selection functionality
+        roleCards.forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove selected class from all cards
+                roleCards.forEach(c => c.classList.remove('selected'));
+                
+                // Add selected class to clicked card
+                this.classList.add('selected');
+                
+                const role = this.getAttribute('data-role');
+                selectedRoleInput.value = role;
+                
+                // Show/hide ID field based on role
+                if (role) {
+                    idField.classList.remove('hidden');
+                    
+                    if (role === 'student') {
+                        idLabel.textContent = 'Student ID';
+                        userIdInput.placeholder = '221-15-4716';
+                        userIdInput.setAttribute('required', 'required');
+                    } else if (role === 'instructor') {
+                        idLabel.textContent = 'Employee ID';
+                        userIdInput.placeholder = 'EMP001';
+                        userIdInput.setAttribute('required', 'required');
+                    }
+                    
+                    // Hide role error
+                    if (roleError) {
+                        roleError.classList.add('hidden');
+                    }
+                }
+            });
+        });
+        
+        // Password toggle functionality
+        if (togglePasswordBtn && passwordInput) {
+            togglePasswordBtn.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                const icon = this.querySelector('i');
+                if (icon) {
+                    if (type === 'text') {
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                }
+            });
+        }
+        
+        if (togglePasswordConfirmBtn && passwordConfirmInput) {
+            togglePasswordConfirmBtn.addEventListener('click', function() {
+                const type = passwordConfirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordConfirmInput.setAttribute('type', type);
+                
+                const icon = this.querySelector('i');
+                if (icon) {
+                    if (type === 'text') {
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    } else {
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    }
+                }
+            });
+        }
+        
+        // User ID input handler
+        if (userIdInput) {
+            userIdInput.addEventListener('input', function() {
+                const role = selectedRoleInput.value;
+                const value = this.value;
+                
+                // Update hidden fields based on role
+                if (role === 'student') {
+                    if (studentIdInput) studentIdInput.value = value;
+                    if (employeeIdInput) employeeIdInput.value = '';
+                } else if (role === 'instructor') {
+                    if (employeeIdInput) employeeIdInput.value = value;
+                    if (studentIdInput) studentIdInput.value = '';
+                }
+            });
+        }
+        
+        // Form submit handler
+        if (registrationForm) {
+            registrationForm.addEventListener('submit', function(e) {
+                // Check if role is selected
+                if (!selectedRoleInput || !selectedRoleInput.value) {
+                    e.preventDefault();
+                    if (roleError) {
+                        roleError.classList.remove('hidden');
+                        roleError.scrollIntoView({ behavior: 'smooth' });
+                    }
+                    return false;
+                }
+                
+                // Show loading state
+                if (submitBtn) submitBtn.disabled = true;
+                if (submitText) submitText.textContent = 'Creating Account...';
+                if (submitLoader) submitLoader.classList.remove('hidden');
+                
+                // Update hidden fields one more time before submit
+                const role = selectedRoleInput.value;
+                const userId = userIdInput ? userIdInput.value : '';
+                
+                if (role === 'student') {
+                    if (studentIdInput) studentIdInput.value = userId;
+                    if (employeeIdInput) employeeIdInput.value = '';
+                } else if (role === 'instructor') {
+                    if (employeeIdInput) employeeIdInput.value = userId;
+                    if (studentIdInput) studentIdInput.value = '';
+                }
+            });
+        }
+        
+        // Set initial role if provided by old() value
+        const oldRole = selectedRoleInput ? selectedRoleInput.value : '';
+        if (oldRole) {
+            const roleCard = document.querySelector(`[data-role="${oldRole}"]`);
+            if (roleCard) {
+                roleCard.click();
+            }
+        }
+    }
     
     // ===========================================
     // SHARED FUNCTIONS
