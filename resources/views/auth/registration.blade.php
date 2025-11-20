@@ -87,6 +87,137 @@
             color: white !important;
         }
     </style>
+    
+    <!-- Inline JavaScript for role selection - guaranteed to work -->
+    <script>
+        // Execute immediately when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initRoleSelection);
+        } else {
+            initRoleSelection();
+        }
+        
+        function initRoleSelection() {
+            const roleCards = document.querySelectorAll('.role-card');
+            const selectedRoleInput = document.getElementById('selectedRole');
+            const idField = document.getElementById('idField');
+            const idLabel = document.getElementById('idLabel');
+            const userIdInput = document.getElementById('userId');
+            const studentIdInput = document.getElementById('student_id');
+            const employeeIdInput = document.getElementById('employee_id');
+            const roleError = document.getElementById('roleError');
+            const registrationForm = document.getElementById('registrationForm');
+            
+            // Role card click handler
+            roleCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    console.log('Role card clicked:', this.getAttribute('data-role'));
+                    
+                    // Remove selected class from all cards
+                    roleCards.forEach(c => c.classList.remove('selected'));
+                    
+                    // Add selected class to clicked card
+                    this.classList.add('selected');
+                    
+                    const role = this.getAttribute('data-role');
+                    selectedRoleInput.value = role;
+                    
+                    // Show ID field
+                    idField.classList.remove('hidden');
+                    
+                    // Update label and placeholder based on role
+                    if (role === 'student') {
+                        idLabel.textContent = 'Student ID';
+                        userIdInput.placeholder = '221-15-4716';
+                    } else if (role === 'instructor') {
+                        idLabel.textContent = 'Employee ID';
+                        userIdInput.placeholder = 'EMP001';
+                    }
+                    
+                    // Hide error
+                    if (roleError) roleError.classList.add('hidden');
+                });
+            });
+            
+            // User ID input handler
+            if (userIdInput) {
+                userIdInput.addEventListener('input', function() {
+                    const role = selectedRoleInput.value;
+                    const value = this.value;
+                    
+                    if (role === 'student') {
+                        if (studentIdInput) studentIdInput.value = value;
+                        if (employeeIdInput) employeeIdInput.value = '';
+                    } else if (role === 'instructor') {
+                        if (employeeIdInput) employeeIdInput.value = value;
+                        if (studentIdInput) studentIdInput.value = '';
+                    }
+                });
+            }
+            
+            // Form submit validation
+            if (registrationForm) {
+                registrationForm.addEventListener('submit', function(e) {
+                    if (!selectedRoleInput.value) {
+                        e.preventDefault();
+                        if (roleError) {
+                            roleError.classList.remove('hidden');
+                            roleError.scrollIntoView({ behavior: 'smooth' });
+                        }
+                        return false;
+                    }
+                    
+                    // Update hidden fields before submit
+                    const role = selectedRoleInput.value;
+                    const userId = userIdInput ? userIdInput.value : '';
+                    
+                    if (role === 'student') {
+                        if (studentIdInput) studentIdInput.value = userId;
+                        if (employeeIdInput) employeeIdInput.value = '';
+                    } else if (role === 'instructor') {
+                        if (employeeIdInput) employeeIdInput.value = userId;
+                        if (studentIdInput) studentIdInput.value = '';
+                    }
+                });
+            }
+            
+            // Password toggle
+            const togglePassword = document.getElementById('togglePassword');
+            const password = document.getElementById('password');
+            if (togglePassword && password) {
+                togglePassword.addEventListener('click', function() {
+                    const type = password.type === 'password' ? 'text' : 'password';
+                    password.type = type;
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+                    }
+                });
+            }
+            
+            const togglePasswordConfirmation = document.getElementById('togglePasswordConfirmation');
+            const passwordConfirmation = document.getElementById('password_confirmation');
+            if (togglePasswordConfirmation && passwordConfirmation) {
+                togglePasswordConfirmation.addEventListener('click', function() {
+                    const type = passwordConfirmation.type === 'password' ? 'text' : 'password';
+                    passwordConfirmation.type = type;
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        icon.className = type === 'password' ? 'fas fa-eye-slash' : 'fas fa-eye';
+                    }
+                });
+            }
+            
+            // Restore old role if validation failed
+            const oldRole = selectedRoleInput.value;
+            if (oldRole) {
+                const roleCard = document.querySelector(`[data-role="${oldRole}"]`);
+                if (roleCard) {
+                    roleCard.click();
+                }
+            }
+        }
+    </script>
 </head>
 
 <body class="gradient-bg min-h-screen flex items-center justify-center p-4" @if(session('error')) data-session-error="{{ e(session('error')) }}" @endif @if(session('success')) data-session-success="{{ e(session('success')) }}" @endif>
